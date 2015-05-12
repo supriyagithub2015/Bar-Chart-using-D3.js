@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+<head>
+<title> Demo - Bar Chart with D3.js</title>
+<meta charset="UTF-8">
+<!-- Inline styles -->
+<style>
+.legend {                                                
+        font-size: 12px;                                        
+}                                                        
+rect {                                                 
+        stroke-width: 2;                                       
+}
+.rect:hover {                                                 
+        color:blue;                                       
+}
+.barChart
+{
+ width: 1000px;
+ height: 500px;
+ border: solid 1px gray;
+ padding: 20px;
+}
+</style>
+</head>
+<body>	
+<!-- Svg Container-->
+<svg class="barChart"></svg> 
+<!-- Required external scripts-->
+<script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+<!-- Custom script methods-->
+<script type='text/javascript'>
+
+// This method will generate a bar chart with legend and tool tips, using d3.js.
+function DrawChart() { 
+// Array which provides data for drawing the graph
+  var barData = [{
+    'x': '2015 May 12',
+    'score': 5
+  }, {
+    'x': '2015 May 11',
+    'score': 20
+  }, {
+    'x': '2015 May 10',
+    'score': 10
+  }, {
+    'x': '2015 May 09',
+    'score': 40
+  }, {
+    'x': '2015 May 08',
+    'score': 5
+  }, {
+    'x': '2015 May 07',
+    'score': 5
+  }, {
+    'x': '2015 May 06',
+    'score': 20
+  }, {
+    'x': '2015 May 05',
+    'score': 10
+  }, {
+    'x': '2015 May 04',
+    'score': 40
+  }, {
+    'x': '2015 May 03',
+    'score': 5
+  }];
+
+// Method for generating tooltip object
+var tip = d3.tip()
+  .attr('class', 'd3-tip')
+  .offset([0, 0])
+  .html(function(d) {
+    return "<strong>Data:</strong> <span style='color:red'>"+d.x+" </span>";
+  })
+
+//Date format
+var parseDate = d3.time.format("%Y %b %d");
+
+//Calling tooltip function
+d3.select('.barChart').call(tip);
+
+//Getting svg object
+  var vis = d3.select('.barChart'),
+    WIDTH = 1000,
+    HEIGHT = 500,
+    MARGINS = {
+      top: 20,
+      right: 20,
+      bottom: 20,
+      left: 50
+    },
+
+//Generating X range values
+xRange = d3.time.scale()
+	.range([MARGINS.left, WIDTH - MARGINS.right])
+	.domain([d3.max(barData, function(d) {return parseDate.parse(d.x);}),
+		 d3.min(barData, function(d) {return parseDate.parse(d.x);})]);
+
+//Generate X axis
+xAxis = d3.svg.axis()
+      .scale(xRange).tickSize(2).orient('top').ticks(10).tickFormat(d3.time.format("%d"));
+
+//Appending X axis to SVG container
+vis.append('svg:g')
+    .attr('class', 'x axis')
+    .attr('transform', 'translate(0,20)')
+    .call(xAxis);
+
+//Create y axis line 
+yRange = d3.scale.linear()
+	    .range([HEIGHT - MARGINS.top, MARGINS.bottom])
+            .domain([0,d3.max(barData, function (d) { return d.score; }) ])
+
+//Generate Y axis
+yAxis = d3.svg.axis()
+      .scale(yRange)
+      .orient("left").tickSize(2);
+
+//Appending y axis to SVG container
+  vis.append('svg:g')
+    .attr('class', 'y axis')
+    .attr('transform', 'translate(' + (MARGINS.left) + ',0)')
+    .call(yAxis);
+
+//Legend color
+  var color = d3.scale.category20b();
+
+//Adding bars to the chart
+  vis.selectAll('rect')
+    .data(barData)
+    .enter()
+    .append('rect')
+    .attr('class','rect')
+    .attr('x', function (d) {
+      return xRange(parseDate.parse(d.x));
+    })
+    .attr('y', function (d) {
+      return yRange(d.score);
+    })
+    .attr('width', 50)
+    .attr('height', function (d) {
+      return ((HEIGHT - MARGINS.bottom) - yRange(d.score));
+    })
+    .attr('fill', 'grey')
+    .on('mouseover',tip.show)
+    .on('mouseout',tip.hide);
+
+// Adding legend to the graph
+ var legend = vis.selectAll(".legend")
+      .data(barData)
+    .enter().append("g")
+      .attr("class", "legend")
+      .attr("transform", function(d, i) { return "translate(-70," + i * 20 + ")"; });
+
+  legend.append("rect")
+      .attr("x", 60)
+      .attr("width", 18)
+      .attr("height", 18)
+      .style("fill", color);
+
+var legendFormat = d3.time.format("%d");
+  legend.append("text")
+      .attr("x", 95)
+      .attr("y", 9)
+      .attr("dy", ".35em")
+      .style("text-anchor", "end")
+      .text(function(d) { return legendFormat(new Date(d.x)); });
+}
+
+//Draw bar chart
+DrawChart();
+
+</script>
+</body>
+</html>
+
