@@ -24,13 +24,41 @@ rect {
 </style>
 </head>
 <body>	
+<!--Y-zxis switching options-->
+<div>
+<input type="radio" id="score" name="yAxis" value="score" checked>Score<br>
+<input type="radio" id="event" name="yAxis" value="event">Event
+</div>
+
 <!-- Svg Container-->
 <svg class="barChart"></svg> 
+
 <!-- Required external scripts-->
 <script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
 <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
 <!-- Custom script methods-->
 <script type='text/javascript'>
+
+//Method helps to switch the Y-axis range
+function switchYAxis(event)
+{
+    var target = event.target;
+	d3.select('.barChart').selectAll("*").remove();
+	//d3.svg.selectAll("rect").remove()
+if(target.value=="score")
+DrawChart("score");
+else if(target.value=="event")
+DrawChart("event");
+}
+
+//Register events
+function registerEvents()
+{
+    var objects= document.getElementsByName('yAxis');
+for (var i=0;i<objects.length;i++){
+        objects[i].addEventListener('click', function(e){switchYAxis(e);},false);
+    }
+}
 
 // This method will generate a bar chart with legend and tool tips, using d3.js.
 function DrawChart(yAxisType) { 
@@ -38,7 +66,7 @@ function DrawChart(yAxisType) {
    var barData = [{
     'day': '2015 May 12',
     'score': 5,
-    'event': 5
+    'event': 15
   }, {
     'day': '2015 May 11',
     'score': 20,
@@ -134,8 +162,6 @@ preValue;
 xAxis = d3.svg.axis()
       .scale(xRange).tickSize(2).orient('top').tickFormat('');
 
-
-
 //Appending X axis to SVG container
 XAxisLabels =vis.append('svg:g')
     .attr('class', 'x axis')
@@ -187,7 +213,7 @@ yAxis = d3.svg.axis()
     .attr('y', function (d) {
       return yRange(selectYaxis(yAxisType,d));
     })
-    .attr('width',  xRange.rangeBand())
+    .attr('width', xRange.rangeBand())
     .attr('height', function (d) {
       return ((HEIGHT - MARGINS.bottom) - yRange(selectYaxis(yAxisType,d)));
     })
@@ -218,7 +244,9 @@ var legendFormat = d3.time.format("%d");
 }
 
 //Draw bar chart
-DrawChart("event");
+DrawChart("score");
+//Register radio button's click event
+registerEvents();
 //Function to select Y axis value type
 function selectYaxis(type,object)
 {
